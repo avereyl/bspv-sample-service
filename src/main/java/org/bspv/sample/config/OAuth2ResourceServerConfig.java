@@ -28,37 +28,25 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
      * (non-Javadoc)
      * 
      * @see org.springframework.security.oauth2.config.annotation.web.configuration.
-     * ResourceServerConfigurerAdapter#configure(org.springframework.security.oauth2
-     * .config.annotation.web.configurers.ResourceServerSecurityConfigurer)
+     * ResourceServerConfigurerAdapter#configure(org.springframework.security.config
+     * .annotation.web.builders.HttpSecurity)
      */
     @Override
-    public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
-        resources.tokenServices(tokenServices());
+    public void configure(HttpSecurity http) throws Exception {
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
+        .anyRequest().authenticated();
     }
 
     /*
      * (non-Javadoc)
      * 
      * @see org.springframework.security.oauth2.config.annotation.web.configuration.
-     * ResourceServerConfigurerAdapter#configure(org.springframework.security.config
-     * .annotation.web.builders.HttpSecurity)
+     * ResourceServerConfigurerAdapter#configure(org.springframework.security.oauth2
+     * .config.annotation.web.configurers.ResourceServerSecurityConfigurer)
      */
     @Override
-    public void configure(HttpSecurity http) throws Exception {
-// @formatter:off
-        http
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
-            .authorizeRequests().anyRequest().authenticated();
-// @formatter:on
-    }
-
-    @Bean
-    @Primary
-    public DefaultTokenServices tokenServices() {
-        final DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
-        defaultTokenServices.setTokenStore(tokenStore());
-        return defaultTokenServices;
+    public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+        resources.tokenServices(tokenServices());
     }
 
     @Bean
@@ -69,7 +57,6 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
          * 
          * @see JwtTokenStore
          */
-
         return new JwtTokenStore(accessTokenConverter());
     }
 
@@ -89,6 +76,16 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
         converter.setJwtClaimsSetVerifier(jwtClaimsSetVerifier());
         return converter;
     }
+    
+    @Bean
+    @Primary
+    public DefaultTokenServices tokenServices() {
+        final DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
+        defaultTokenServices.setTokenStore(tokenStore());
+        return defaultTokenServices;
+    }
+
+
 
     @Bean
     public JwtClaimsSetVerifier jwtClaimsSetVerifier() {
